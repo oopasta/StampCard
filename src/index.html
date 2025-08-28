@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#8b5cf6">
+  <meta name="background-color" content="#f9fafb">
+  <meta name="description" content="設定目標，獲得獎勵！追蹤你的日常習慣和目標進度">
+  <meta name="keywords" content="集點卡,目標,習慣,追蹤,獎勵,心理">
+  
+  <!-- Apple PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="心理集點卡">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  
+  <!-- Microsoft PWA Meta Tags -->
+  <meta name="msapplication-TileColor" content="#8b5cf6">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/icon-192.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/icon-192.png">
+  
+  <title>心理集點卡</title>
+  
+  <!-- Prevent zoom on iOS -->
+  <style>
+    html, body {
+      touch-action: manipulation;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* PWA 全螢幕優化 */
+    @media (display-mode: standalone) {
+      body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+    }
+    
+    /* 防止下拉刷新 */
+    body {
+      overscroll-behavior-y: contain;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <!-- PWA 安裝提示 -->
+  <script>
+    // 防止 iOS Safari 的拖拽行為
+    document.addEventListener('touchmove', function(e) {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+    
+    // 防止雙擊縮放
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function(e) {
+      const now = (new Date()).getTime();
+      if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, false);
+  </script>
+</body>
+</html>

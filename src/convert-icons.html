@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA 圖示轉換工具</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f9fafb;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #8b5cf6;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .preview-section {
+            margin: 30px 0;
+            text-align: center;
+        }
+        .icon-preview {
+            display: inline-block;
+            margin: 10px;
+            padding: 20px;
+            background: #f3f4f6;
+            border-radius: 8px;
+        }
+        .download-section {
+            margin: 30px 0;
+            text-align: center;
+        }
+        button {
+            background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+            transition: opacity 0.2s;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .instructions {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        canvas {
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 心理集點卡 PWA 圖示轉換工具</h1>
+        
+        <div class="instructions">
+            <h3>📋 使用說明</h3>
+            <ol>
+                <li>點擊下方按鈕產生不同尺寸的 PNG 圖示</li>
+                <li>右鍵點擊圖片，選擇「另存圖片」</li>
+                <li>將檔案重新命名並放入 <code>public/</code> 資料夾：
+                    <ul>
+                        <li><code>icon-192.png</code> (192×192 像素)</li>
+                        <li><code>icon-512.png</code> (512×512 像素)</li>
+                        <li><code>favicon.ico</code> (32×32 像素，可選)</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <div class="preview-section">
+            <h3>🖼️ 圖示預覽</h3>
+            <div id="previews"></div>
+        </div>
+
+        <div class="download-section">
+            <h3>📥 產生圖示</h3>
+            <button onclick="generateIcon(192)">產生 192×192 圖示</button>
+            <button onclick="generateIcon(512)">產生 512×512 圖示</button>
+            <button onclick="generateIcon(32)">產生 32×32 Favicon</button>
+        </div>
+    </div>
+
+    <script>
+        // SVG 圖示內容
+        const iconSVG = `
+        <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="backgroundGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+            </linearGradient>
+            <linearGradient id="cardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.95" />
+              <stop offset="100%" style="stop-color:#f8fafc;stop-opacity:0.9" />
+            </linearGradient>
+            <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.15"/>
+            </filter>
+          </defs>
+          
+          <circle cx="256" cy="256" r="240" fill="url(#backgroundGradient)" filter="url(#shadow)"/>
+          <rect x="96" y="180" width="320" height="200" rx="24" fill="url(#cardGradient)" opacity="0.95"/>
+          
+          <circle cx="150" cy="220" r="16" fill="#10b981" opacity="0.9"/>
+          <circle cx="200" cy="220" r="16" fill="#10b981" opacity="0.9"/>
+          <circle cx="250" cy="220" r="16" fill="#10b981" opacity="0.9"/>
+          <circle cx="300" cy="220" r="16" fill="#f59e0b" opacity="0.7" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4,4"/>
+          <circle cx="350" cy="220" r="16" fill="none" stroke="#d1d5db" stroke-width="2" stroke-dasharray="4,4"/>
+          
+          <circle cx="175" cy="270" r="16" fill="#10b981" opacity="0.9"/>
+          <circle cx="225" cy="270" r="16" fill="#10b981" opacity="0.9"/>
+          <circle cx="275" cy="270" r="16" fill="none" stroke="#d1d5db" stroke-width="2" stroke-dasharray="4,4"/>
+          <circle cx="325" cy="270" r="16" fill="none" stroke="#d1d5db" stroke-width="2" stroke-dasharray="4,4"/>
+          
+          <path d="M142 220 L148 226 L158 214" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M192 220 L198 226 L208 214" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M242 220 L248 226 L258 214" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M167 270 L173 276 L183 264" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M217 270 L223 276 L233 264" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          
+          <rect x="120" y="320" width="272" height="8" rx="4" fill="#e5e7eb" opacity="0.6"/>
+          <rect x="120" y="320" width="136" height="8" rx="4" fill="#10b981" opacity="0.8"/>
+          
+          <path d="M380 140 L385 150 L395 150 L387 157 L390 167 L380 160 L370 167 L373 157 L365 150 L375 150 Z" fill="#fbbf24" opacity="0.8"/>
+          <path d="M420 320 L423 327 L430 327 L425 332 L427 339 L420 335 L413 339 L415 332 L410 327 L417 327 Z" fill="#fbbf24" opacity="0.6"/>
+          
+          <path d="M256 120 C280 120 300 140 300 164 C300 180 290 195 275 205 C265 210 245 210 235 205 C220 195 210 180 210 164 C210 140 230 120 256 120 Z" fill="#ffffff" opacity="0.9"/>
+          <circle cx="245" cy="150" r="4" fill="#8b5cf6"/>
+          <circle cx="267" cy="150" r="4" fill="#8b5cf6"/>
+          <path d="M240 170 Q256 180 272 170" stroke="#8b5cf6" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>`;
+
+        const faviconSVG = `
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#8b5cf6"/>
+              <stop offset="100%" style="stop-color:#3b82f6"/>
+            </linearGradient>
+          </defs>
+          
+          <rect width="32" height="32" rx="6" fill="url(#bgGrad)"/>
+          <rect x="4" y="8" width="24" height="16" rx="2" fill="#ffffff" opacity="0.9"/>
+          
+          <circle cx="8" cy="16" r="2" fill="#10b981"/>
+          <circle cx="16" cy="16" r="2" fill="#10b981"/>
+          <circle cx="24" cy="16" r="2" fill="none" stroke="#d1d5db" stroke-width="1" stroke-dasharray="1,1"/>
+          
+          <path d="M6.5 16 L7.5 17 L9.5 15" stroke="#ffffff" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <path d="M14.5 16 L15.5 17 L17.5 15" stroke="#ffffff" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        </svg>`;
+
+        function generateIcon(size) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            canvas.width = size;
+            canvas.height = size;
+            
+            const svgContent = size === 32 ? faviconSVG : iconSVG;
+            const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, size, size);
+                
+                // 顯示預覽
+                const previewDiv = document.getElementById('previews');
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'icon-preview';
+                iconDiv.innerHTML = `
+                    <h4>${size}×${size} 像素</h4>
+                    <canvas width="${size}" height="${size}" style="width: ${Math.min(size, 128)}px; height: ${Math.min(size, 128)}px;"></canvas>
+                    <br><br>
+                    <a href="${canvas.toDataURL()}" download="icon-${size}.png">
+                        <button>下載 PNG</button>
+                    </a>
+                `;
+                
+                const previewCanvas = iconDiv.querySelector('canvas');
+                const previewCtx = previewCanvas.getContext('2d');
+                previewCtx.drawImage(canvas, 0, 0);
+                
+                previewDiv.appendChild(iconDiv);
+                
+                URL.revokeObjectURL(url);
+            };
+            
+            img.src = url;
+        }
+    </script>
+</body>
+</html>
