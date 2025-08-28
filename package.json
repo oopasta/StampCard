@@ -1,6 +1,6 @@
 
   {
-      "name": "心理集點卡應用",
+      "name": "stamp-card",
       "version": "0.1.0",
       "private": true,
       "dependencies": {
