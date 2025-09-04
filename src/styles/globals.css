@@ -225,3 +225,16 @@ html {
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: xor;
 }
+
+
+:root { --vh: 1vh; }
+@supports (height: 100svh) { :root { --vh: 1svh; } }
+@supports (height: 100dvh) { :root { --vh: 1dvh; } }
+
+html, body {
+  height: auto;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: auto;
+  touch-action: auto;
+}

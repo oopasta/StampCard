@@ -619,17 +619,18 @@ export default function App() {
   };
 
   // Calculate total page height dynamically
-  const getTotalPageHeight = () => {
-    if (cards.length === 0) return 'max(100vh, 800px)';
-    
-    let totalHeight = 387; // Base height before cards
-    cards.forEach(card => {
-      totalHeight += getCardHeight(card);
-    });
-    totalHeight += 200; // Additional padding for bottom content
-    
-    return `max(100vh, ${totalHeight}px)`;
-  };
+  // 新寫法（純數字 px，不再回傳 "max(100vh, ...)"）
+const getTotalPageContentHeightPx = () => {
+  if (cards.length === 0) return 800; // 空頁保底高度
+
+  let totalHeight = 387; // 固定頂部區塊
+  cards.forEach((card) => {
+    totalHeight += getCardHeight(card);
+  });
+  totalHeight += 200; // 底部留白
+
+  return totalHeight; // 回傳數字（px）
+};
 
   return (
     <div 
